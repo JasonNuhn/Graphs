@@ -3,8 +3,8 @@
  */
 export class Edge {
   // !!! IMPLEMENT ME
-  constructor(weight, destination) {
-    this.weight = weight;
+  constructor(destination, weight) {
+    // this.weight = weight; do later
     this.destination = destination;
   }
 }
@@ -12,19 +12,13 @@ export class Edge {
 /**
  * Vertex
  */
-// export class Vertex {
-//   // !!! IMPLEMENT ME
-//   constructor() {
-//     this.edges = [];
-//     this.parent = null;
-//   }
-// }
-
 export class Vertex {
-  constructor(value) {
-        this.value = value;
-        this.edges = [];
-    }
+  // !!! IMPLEMENT ME
+  constructor() {
+    this.edges = [];
+    this.parent = null;
+    this.color = 'white';
+  }
 }
 
 /**
@@ -32,13 +26,15 @@ export class Vertex {
  */
 export class Graph {
   constructor() {
+    this.stack = [];
     this.vertexes = [];
+    this.currentNode = '';
   }
 
   /**
    * Create a random graph
    */
-  randomize(width, height, pxBox, probability=0.6) {
+  randomize(width, height, pxBox, probability = 0.6) {
     // Helper function to set up two-way edges
     function connectVerts(v0, v1) {
       v0.edges.push(new Edge(v1));
@@ -53,7 +49,6 @@ export class Graph {
       let row = [];
       for (let x = 0; x < width; x++) {
         let v = new Vertex();
-        //v.value = 'v' + x + ',' + y;
         v.value = 'v' + count++;
         row.push(v);
       }
@@ -66,14 +61,14 @@ export class Graph {
         // Connect down
         if (y < height - 1) {
           if (Math.random() < probability) {
-            connectVerts(grid[y][x], grid[y+1][x]);
+            connectVerts(grid[y][x], grid[y + 1][x]);
           }
         }
 
         // Connect right
         if (x < width - 1) {
           if (Math.random() < probability) {
-            connectVerts(grid[y][x], grid[y][x+1]);
+            connectVerts(grid[y][x], grid[y][x + 1]);
           }
         }
       }
@@ -124,8 +119,22 @@ export class Graph {
   /**
    * BFS
    */
+
+
   bfs(start) {
-    // !!! IMPLEMENT ME
+    start = this.vertexes[0];
+    let stack = this.stack;
+    if (this.stack.length === 0) stack.push(start);
+    let u = stack[0];
+    u.edges.forEach(e => {
+      let vert = e.destination;
+      if (vert.color === 'white') {
+        vert.color = 'grey';
+        stack.push(vert);
+      }
+    })
+    u.color = 'black';
+    stack.shift();
   }
 
   /**

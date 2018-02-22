@@ -3,8 +3,8 @@ import { Graph } from './graph';
 import './App.css';
 
 // !!! IMPLEMENT ME
-const canvasWidth = 1000;
-const canvasHeight = 1000;
+const canvasWidth = 800;
+const canvasHeight = 800;
 
 /**
  * GraphView
@@ -15,6 +15,17 @@ class GraphView extends Component {
    */
   componentDidMount() {
     this.updateCanvas();
+    let refresh = setInterval(() => {
+      action();
+    }, 1000);
+    let action = () => {
+      this.props.graph.bfs();
+      this.updateCanvas();
+      console.log(this.props.graph)
+      if (this.props.graph.stack.length === 0) {
+        clearInterval(refresh);
+      }
+    };
   }
 
   /**
@@ -24,69 +35,36 @@ class GraphView extends Component {
     this.updateCanvas();
   }
 
-  /**
-   * Render the canvas
-   */
   updateCanvas() {
+
     let canvas = this.refs.canvas;
     let ctx = canvas.getContext('2d');
-    let circles = (x, y) => {
-      ctx.beginPath();
-      ctx.arc(x, y, 22, 0, 2 * Math.PI, false);
-      ctx.fillStyle = "purple";
-      ctx.fill();
-      ctx.stroke();
-    }
-    let numbers = (x, y) => {
-      ctx.beginPath();
-      ctx.fillStyle = '#0FF';
-      ctx.fill();
-      ctx.font = "30px Georgia";
-      ctx.fillText(index, x - 10, y + 10);
-      ctx.strokeStyle = '#000';
-      ctx.stroke();
-    }
-    let lines = (x, y, nX, nY) => {
-      ctx.moveTo(x, y);
-      ctx.lineWidth = 2;
-      ctx.lineTo(nX, nY);
-      ctx.stroke();
-    }
-    // Clear it
-    ctx.fillStyle = 'yellow';
+
+    ctx.fillStyle = '#7a9cd3';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-
-    for (let v of this.props.graph.vertexes) {
-      let x = v.pos.x;
-      let y = v.pos.y;
-      for (let w of v.edges) {
-        let nX = w.weight.pos.x;
-        let nY = w.weight.pos.y;
-        lines(x, y, nX, nY);
-      }
-    }
-
-    let index = 1;
-    for (let v of this.props.graph.vertexes) {
-      let x = v.pos.x;
-      let y = v.pos.y;
-      circles(x, y);
-      numbers(x, y);
-      index++;
-    }
-
-
-
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this.state.graphs.vertexes for each vertex.pos.x & vertex.pos.y
-
-
-
-
-    // !!! IMPLEMENT ME
-    // compute connected components
-    // draw edges
-    // draw verts
-    // draw vert values (labels)
+    this.props.graph.vertexes.forEach((vertex) => {
+      vertex.edges.forEach((edge) => {
+        ctx.moveTo(vertex.pos.x, vertex.pos.y);
+        ctx.lineTo(edge.destination.pos.x, edge.destination.pos.y);
+      })
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.stroke();
+    })
+    this.props.graph.vertexes.forEach((vertex) => {
+      ctx.beginPath();
+      ctx.arc(vertex.pos.x, vertex.pos.y, 20, 0, Math.PI * 2, true);
+      ctx.strokeStyle = '#324056'; // EB9D20
+      ctx.stroke();
+      ctx.fillStyle = vertex.color;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.font = '16px Georgia';
+      ctx.fontStyle = 'bold';
+      ctx.fillStyle = '#324056';
+      ctx.fillText(vertex.value, vertex.pos.x - 7, vertex.pos.y + 4);
+      ctx.fill();
+    })
   }
 
   /**
@@ -110,13 +88,18 @@ class App extends Component {
     };
 
     this.state.graph.randomize(5, 4, 150, 0.6);
-    //console.log(this.state.graph.vertexes);
+    this.state.graph.bfs();
   }
 
+  handleRandomize = (e) => {
+    console.log('randomize')
+    this.state.graph.randomize(5, 4, 150, 0.6);
+  }
   render() {
     return (
       <div className="App">
         <GraphView graph={this.state.graph}></GraphView>
+        {/* <button onClick={this.handleRandomize}>Randomize</button> */}
       </div>
     );
   }
